@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -15,9 +16,11 @@ import (
 var (
 	requestPath = "/api/breachedaccount/"
 
-	emailFile = "email-list.txt"
+	emailFile  = "email-list.txt"
+	resultFile = "email-list-result.json"
 	// Command line flags
-	inputFunc = flag.String("i", emailFile, "Input file with one email per line")
+	inputFunc  = flag.String("i", emailFile, "Input file with one email per line")
+	outputFunc = flag.String("o", resultFile, "Output file with the result")
 )
 
 func main() {
@@ -56,9 +59,11 @@ func handleQueries(filePath string) {
 		}
 		time.Sleep(2 * time.Second)
 	}
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
-	enc.Encode(ba)
+	hibpJson, _ := json.Marshal(ba)
+	err = ioutil.WriteFile(*outputFunc, hibpJson, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 type HIBP struct {
